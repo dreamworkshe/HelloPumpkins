@@ -1,6 +1,8 @@
 Checkin::Application.routes.draw do
+  root to: 'static_pages#home'
+  match '/help', to: 'static_pages#help'
+  match '/register', to: 'events#new'
   get "static_pages/home"
-
   get "static_pages/help"
 
   # The priority is based upon order of creation:

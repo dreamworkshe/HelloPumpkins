@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Checkin: <%= yield(:title) %> </title>
-  <%= stylesheet_link_tag    "application", :media => "all" %>
+  <title>Welcome aboard</title>
+  <%= stylesheet_link_tag    "application", media: "all" %>
   <%= javascript_include_tag "application" %>
   <%= csrf_meta_tags %>
+  <%= render 'layouts/shim' %>
 </head>
-<body>
 
-<%= yield %>
+<body>
+	<%= render 'layouts/header' %>
+
+	<div class="container">
+		<%= yield %>
+		<%= render 'layouts/footer' %>
+	</div>
 
 </body>
 </html>

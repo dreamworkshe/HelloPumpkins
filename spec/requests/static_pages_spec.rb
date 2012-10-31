@@ -5,9 +5,9 @@ describe "StaticPages" do
 	describe "Home page" do
 
 		it "should have the content 'Check in!'" do
-			visit '/static_pages/home'
-			page.should have_content('check')
-			page.should have_selector('title', :text => 'check')
+			visit root_path
+			page.should have_content('checkin')
+			#page.should have_selector('title', text: 'check')
 
 		end
 
@@ -16,9 +16,8 @@ describe "StaticPages" do
 	describe "Help page" do
 
 		it "should have the content 'Help'" do
-			visit '/static_pages/help'
+			visit help_path
 			page.should have_content('Help')
-
 		end
 
 	end
