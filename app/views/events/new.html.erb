@@ -1,2 +1,19 @@
-<h1>Events#new</h1>
-<p>Find me in app/views/events/new.html.erb</p>
+<h1>Add a new event</h1>
+
+
+
+<div class="row">
+	<div class="span6 offset3">
+		<%= render 'shared/error_messages' %>
+		<%= form_for(@event) do |f| %>
+			<%= f.label :name %>
+			<%= f.text_field :name %>
+			<%= f.label :capacity %>
+			<%= f.text_field :capacity %>
+
+			<%= f.submit "Create my event", class: "btn btn-large btn-primary" %>
+		<% end %>
+	</div>
+</div>
+
+
