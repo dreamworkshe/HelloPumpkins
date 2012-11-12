@@ -5,6 +5,7 @@ Checkin::Application.routes.draw do
   root to: 'static_pages#home'
   match '/help', to: 'static_pages#help'
   match '/hold', to: 'events#new'
+  match '/push', to: 'events#push'
   match '/signin', to: 'sessions#new'
   match '/signout', to: 'sessions#destroy'
   get "static_pages/home"
