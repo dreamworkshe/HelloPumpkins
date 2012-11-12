@@ -42,11 +42,11 @@ $(function() {
 	//alert($("#time").html());
 	$("#time").text(d.getDate());
 
-	if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(success, error);
-	} else {
-		error('not supported');
-	}
-
 
 });
+
+if (navigator.geolocation) {
+	navigator.geolocation.getCurrentPosition(success, error);
+} else {
+	error('not supported');
+}
