@@ -32,18 +32,16 @@ $("test-link").click(function() {
 	alert('...');
 });
 
-$(function() {
-	var pusher = new Pusher('0b7f4e07db19c4ba312d');
-	var channel = pusher.subscribe('test_channel');
-	channel.bind('push', function(data) {
-		//alert(data);
-	});
-	var d = new Date();
-	//alert($("#time").html());
-	$("#time").text(d.getDate());
-
-
-});
+// $(function() {
+// 	var pusher = new Pusher('0b7f4e07db19c4ba312d');
+// 	var channel = pusher.subscribe('test_channel');
+// 	channel.bind('push', function(data) {
+// 		//alert(data);
+// 	});
+// 	var d = new Date();
+// 	//alert($("#time").html());
+// 	$("#time").text(d.getDate());
+// });
 
 if (navigator.geolocation) {
 	navigator.geolocation.getCurrentPosition(success, error);
