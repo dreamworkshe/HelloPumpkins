@@ -1,0 +1,14 @@
+<h1>Sign in</h1>
+
+<div class="row">
+	<div class="span4 offset4">
+		<%= form_for(:session, url: sessions_path) do |f| %>
+			<%= f.label :name %>
+			<%= f.text_field :name %>
+
+			<%= f.submit "Sign in", class: "btn btn-large btn-primary" %>
+		<% end %>
+
+		<p>Want to hold a new event? <%= link_to "Create now!", hold_path %> </p>
+	</div>
+</div>
