@@ -1,0 +1,19 @@
+<style>
+#loginform {
+	margin: 30px;
+}
+</style>
+
+<div data-role="page" data-title="Home">
+	<div data-role="header" data-theme="b" >
+		<h1>Welcome</h1>
+	</div>
+	<%= form_for(:member, url: members_path, html: { id: "loginform" }) do |f| %>
+	<%= f.label "Enter your name:" %>
+	<%= f.text_field :name %>
+	<%= f.submit "Login" %>
+	<% end %>
+	<div data-role="footer" data-theme="b">
+		<h1>Inf 241 2012 Fall</h1>
+	</div>
+</div>
