@@ -1,20 +1,6 @@
 if (navigator.geolocation) {
-	navigator.geolocation.getCurrentPosition(success, error);
-  navigator.geolocation.watchPosition(function(position){
-    // These variables update every time the location changes
-    var Latitude = position.coords.latitude;
-    var Longitude = position.coords.longitude;
-    alert(Latitude + " " + Longitude);
-  }, function(error){
-    // You can detect the reason and alert it; I chose not to.   
-    alert('We could not get your location');
-  },{
-    // It'll stop looking after an hour. Enabling high accuracy tells it to use GPS if it's available  
-    timeout: 5000,
-    maximumAge: 600000,
-    enableHighAccuracy: true,
-    frequency: 5000
-  });
+  monitorPosition();
+	//navigator.geolocation.getCurrentPosition(success, error);
 } else {
 	error('not supported');
 }
@@ -41,6 +27,16 @@ channel.bind('client-123', function(member) {
   console.log('yes');
 });
 
+
+function monitorPosition() {
+  navigator.geolocation.getCurrentPosition(function(position) {
+    var lat = position.coords.latitude, lon = position.coords.longitude;
+    alert(lat + " " + lon);
+    setTimeout(monitorPosition, 3000);
+  }, function() {
+    alert('error');
+  });
+}
 
 
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
