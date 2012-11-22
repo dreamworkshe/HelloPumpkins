@@ -1,14 +1,19 @@
 <div data-role="page" data-title="Home">
-	<div data-role="header" data-theme="b" >
+	<div data-role="header" data-theme="b">
+		<a href="/login" data-iconpos="notext" data-icon="home"></a>
 		<h1>Welcome</h1>
 	</div>
-	<div data-role="content">	
-		<h1><%= session[:name] %></h1>	
+	<div data-role="content" class="a_page">	
+		<h1><%= session[:name] %></h1>
+		<center><div id="map_container"></div></center>
 	</div>
 	<div data-role="footer" data-theme="b">
-		<h1>Inf 241 2012 Fall</h1>
+		<h1>Ubicomp 2012 Fall</h1>
 	</div>
+	<%= javascript_include_tag "http://maps.google.com/maps/api/js?sensor=false" %>
+	<%= javascript_include_tag "enter" %>
 </div>
+
 
 
 
