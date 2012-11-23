@@ -64,7 +64,7 @@ function setupMap() {
   navigator.geolocation.getCurrentPosition(function(position) {
     var mapcanvas = document.createElement('div');
     mapcanvas.id = 'mapcanvas';
-    var map_width = $(document).width() * 0.8,
+    var map_width = $(window).width() * 0.8,
     map_height = map_width * 0.8;
     mapcanvas.style.width = map_width + 'px';
     mapcanvas.style.height = map_height + 'px';
