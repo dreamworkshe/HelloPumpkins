@@ -1,5 +1,5 @@
 if (navigator.geolocation) {
-  monitorPosition();
+  //monitorPosition();
 	//navigator.geolocation.getCurrentPosition(success, error);
 } else {
 	error('not supported');
