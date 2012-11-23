@@ -64,14 +64,14 @@ function setupMap() {
   navigator.geolocation.getCurrentPosition(function(position) {
     var mapcanvas = document.createElement('div');
     mapcanvas.id = 'mapcanvas';
-    var map_width = $(window).width() * 0.8,
-    map_height = map_width * 0.8;
+    var map_width = $(window).width() * 0.9,
+    map_height = $(window).height() * 0.8;
     mapcanvas.style.width = map_width + 'px';
     mapcanvas.style.height = map_height + 'px';
     $('#map_container').append(mapcanvas);
     var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
     var options = {
-      zoom: 17,
+      zoom: 15,
       center: latlng,
       mapTypeControl: false,
       navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
