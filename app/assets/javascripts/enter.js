@@ -5,13 +5,14 @@ var Markers = new Array();
 // get username
 var Name = $('#username').text();
 
-// start monitoring position
-if (navigator.geolocation) {
-  setupChannel();
-  setupMap(); //monitorPosition after successfully setup map!
-} else {
-	alert('Please turn on location service');
-}
+$(document).ready( function() {
+  if (navigator.geolocation) {
+    setupChannel();
+    setupMap(); //monitorPosition after successfully setup map!
+  } else {
+  	alert('Please turn on location service');
+  }
+});
 
 // set up channel
 function setupChannel() {
@@ -59,10 +60,11 @@ function setupChannel() {
 
 // set up map canvas
 function setupMap() {
+  console.log("here");
   navigator.geolocation.getCurrentPosition(function(position) {
     var mapcanvas = document.createElement('div');
     mapcanvas.id = 'mapcanvas';
-    var map_width = $('#map_container').width() * 0.8,
+    var map_width = $(document).width() * 0.8,
     map_height = map_width * 0.8;
     mapcanvas.style.width = map_width + 'px';
     mapcanvas.style.height = map_height + 'px';

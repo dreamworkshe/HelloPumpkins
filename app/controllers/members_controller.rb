@@ -16,6 +16,7 @@ class MembersController < ApplicationController
 			session[:id] = Digest::MD5.hexdigest(Date.current.to_time.to_i.to_s + "_" + name)
 		end
 		render 'enter'
+		#redirect_to :action => :enter
 	end
 
 	def chat
