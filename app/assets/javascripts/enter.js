@@ -1,6 +1,6 @@
 // global variables
 var MAPCANVAS;
-var Markers = new Array();
+var Members = new Array();
 
 // get username
 var Name = $('#username').text();
@@ -29,30 +29,36 @@ function setupChannel() {
   });
 
   channel.bind('pusher:member_removed', function(member) {
-
+    for (var i = 0; i < Members.length; i++) {
+      if (Members[i].id == member.id) {
+        Members[i].marker.setMap(null);
+        Members.splice(i, 1);
+        break;
+      }
+    }
   });
 
   // event for updating postions
   channel.bind('updateMap', function(data) {
-    var who = data.name, lat = data.latitude, lon = data.longitude;
+    var who = data.name, id = data.id, lat = data.latitude, lon = data.longitude;
     console.log(who + " " + lat + " " + lon);
     var latlng = new google.maps.LatLng(lat, lon);
 
     var i;
-    for (i = 0; i < Markers.length; i++) {
-      if (Markers[i].name == who) {
-        Markers[i].marker.setPosition(latlng);
+    for (i = 0; i < Members.length; i++) {
+      if (Members[i].name == who) {
+        Members[i].marker.setPosition(latlng);
         break;
       }
     }
-    console.log(Markers.length);
-    if (i == Markers.length) {
+    //console.log(Members.length);
+    if (i == Members.length) {
       var marker = new google.maps.Marker({
         position: latlng, 
         map: MAPCANVAS
       });
-      var markerpair = {name: who, marker: marker};
-      Markers.push(markerpair);
+      var markerpair = {name: who, id: id, marker: marker, latitude: lat, longitude: lon};
+      Members.push(markerpair);
     }
 
   });
@@ -60,18 +66,18 @@ function setupChannel() {
 
 // set up map canvas
 function setupMap() {
-  console.log("here");
+  //console.log("here");
   navigator.geolocation.getCurrentPosition(function(position) {
     var mapcanvas = document.createElement('div');
     mapcanvas.id = 'mapcanvas';
-    var map_width = $(window).width() * 0.9,
-    map_height = $(window).height() * 0.8;
+    var map_width = $(window).width() * 1,
+    map_height = $(window).height() * 0.75;
     mapcanvas.style.width = map_width + 'px';
     mapcanvas.style.height = map_height + 'px';
     $('#map_container').append(mapcanvas);
     var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
     var options = {
-      zoom: 15,
+      zoom: 16,
       center: latlng,
       mapTypeControl: false,
       navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},

@@ -27,7 +27,11 @@ class MembersController < ApplicationController
 	end
 
 	def enter
-		#print "receive post!\n"
+		if session[:name] == nil
+			name = params[:member][:name]
+			session[:name] = name
+			session[:id] = Digest::MD5.hexdigest(Date.current.to_time.to_i.to_s + "_" + name)
+		end
 	end
 
 	def auth
@@ -52,6 +56,6 @@ class MembersController < ApplicationController
       lon += 0.002 * rand() - 0.001
     end
 
-  	Pusher['presence-map-channel'].trigger!('updateMap', {name: who, latitude: lat, longitude: lon});
+  	Pusher['presence-map-channel'].trigger!('updateMap', {id: session[:id], name: who, latitude: lat, longitude: lon});
   end
 end
