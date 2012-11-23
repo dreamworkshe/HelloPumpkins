@@ -1,0 +1,17 @@
+<div data-role="page" data-title="Home">
+	<div data-role="header" data-theme="b" data-position="fixed">
+		<a href="/login" data-iconpos="notext" data-icon="home"></a>
+		<h1>Welcome</h1>
+	</div>
+	<div data-role="content" class="a_page">	
+		<h1 id="username"><%= session[:name] %></h1>
+	</div>
+	<div data-role="footer" data-theme="b" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="/enter">My Map</a></li>
+				<li><a href="/list" class="ui-btn-active ui-state-persist">My List</a></li>
+			</ul>
+		</div>
+	</div>
+</div>

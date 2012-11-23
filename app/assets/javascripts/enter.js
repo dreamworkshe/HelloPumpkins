@@ -1,11 +1,15 @@
 // global variables
 var MAPCANVAS;
 var Members = new Array();
+var RADIUS = 50;
+var My_marker;
 
 // get username
-var Name = $('#username').text();
+var NAME;
 
-$(document).ready( function() {
+$(document).ready(function() {
+  NAME = $('#username').text();
+  $('#radius_display_block').text("My radar: " + RADIUS.toFixed(0) + "m");
   if (navigator.geolocation) {
     setupChannel();
     setupMap(); //monitorPosition after successfully setup map!
@@ -44,21 +48,42 @@ function setupChannel() {
     console.log(who + " " + lat + " " + lon);
     var latlng = new google.maps.LatLng(lat, lon);
 
+    // update the i-th member's info
     var i;
     for (i = 0; i < Members.length; i++) {
-      if (Members[i].name == who) {
+      if (Members[i].id == id) {
         Members[i].marker.setPosition(latlng);
+        // others, should check distance
+        if (who != NAME) {
+          if (RADIUS >= myDistance(My_marker.getPosition(), Members[i].marker.getPosition())) {
+            console.log(Members[i].name + " is near!");
+          }
+        }
         break;
       }
     }
-    //console.log(Members.length);
+
+    // if member not found
     if (i == Members.length) {
       var marker = new google.maps.Marker({
         position: latlng, 
         map: MAPCANVAS
       });
-      var markerpair = {name: who, id: id, marker: marker, latitude: lat, longitude: lon};
-      Members.push(markerpair);
+      var memberinfo;
+
+      // add member, if member is self, add a distanceWidget
+      if (who == NAME) {
+        My_marker = marker;
+        var distanceWidget = new DistanceWidget(MAPCANVAS, marker);
+        google.maps.event.addListener(distanceWidget, 'distance_changed', function() {
+          RADIUS = distanceWidget.get('distance');
+          $('#radius_display_block').text("My radar: " + RADIUS.toFixed(0) + "m");
+        });
+        memberinfo = {name: who, id: id, marker: marker, latitude: lat, longitude: lon, widget: distanceWidget};
+      } else {
+        memberinfo = {name: who, id: id, marker: marker, latitude: lat, longitude: lon};
+      } 
+      Members.push(memberinfo);
     }
 
   });
@@ -77,7 +102,7 @@ function setupMap() {
     $('#map_container').append(mapcanvas);
     var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
     var options = {
-      zoom: 16,
+      zoom: 17,
       center: latlng,
       mapTypeControl: false,
       navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
@@ -180,12 +205,143 @@ function distance2(lat1, lon1, lat2, lon2) {
   return d;
 };                                                                    
 
-
-
 function error() {
 	alert('error!');
 }
 
+
+
+function DistanceWidget(map, marker) {
+  this.set('map', map);
+  this.set('position', marker.getPosition());
+
+  //var marker = new google.maps.Marker({ draggable: true });
+
+  // Bind the marker map property to the DistanceWidget map property
+  marker.bindTo('map', this);
+
+  // Bind the marker position property to the DistanceWidget position
+  // property
+  marker.bindTo('position', this);
+
+  var radiusWidget = new RadiusWidget();
+
+  // Bind the radiusWidget map to the DistanceWidget map
+  radiusWidget.bindTo('map', this);
+
+  // Bind the radiusWidget center to the DistanceWidget position
+  radiusWidget.bindTo('center', this, 'position');
+
+  // Bind to the radiusWidgets' distance property
+  this.bindTo('distance', radiusWidget);
+
+  // Bind to the radiusWidgets' bounds property
+  this.bindTo('bounds', radiusWidget);
+}
+DistanceWidget.prototype = new google.maps.MVCObject();
+
+function RadiusWidget() {
+  var circle = new google.maps.Circle({
+    strokeWeight: 2
+  });
+
+  // Set the distance property value, default to 10m.
+  this.set('distance', RADIUS);
+
+  // Bind the RadiusWidget bounds property to the circle bounds property.
+  this.bindTo('bounds', circle);
+
+  // Bind the circle center to the RadiusWidget center property
+  circle.bindTo('center', this);
+
+  // Bind the circle map to the RadiusWidget map
+  circle.bindTo('map', this);
+
+  // Bind the circle radius property to the RadiusWidget radius property
+  circle.bindTo('radius', this);
+
+  this.addSizer_();
+}
+RadiusWidget.prototype = new google.maps.MVCObject();
+
+RadiusWidget.prototype.distance_changed = function() {
+  this.set('radius', this.get('distance'));
+};
+
+RadiusWidget.prototype.addSizer_ = function() {
+  var sizer = new google.maps.Marker({
+    draggable: true,
+    title: 'Drag me!'
+  });
+
+  sizer.bindTo('map', this);
+  sizer.bindTo('position', this, 'sizer_position');
+  var me = this;
+  google.maps.event.addListener(sizer, 'drag', function() {
+    // Set the circle distance (radius)
+    me.setDistance();
+  });
+};
+
+RadiusWidget.prototype.center_changed = function() {
+  var bounds = this.get('bounds');
+
+  // Bounds might not always be set so check that it exists first.
+  if (bounds) {
+    var lng = bounds.getNorthEast().lng();
+
+    // Put the sizer at center, right on the circle.
+    var position = new google.maps.LatLng(this.get('center').lat(), lng);
+    this.set('sizer_position', position);
+  }
+};
+
+RadiusWidget.prototype.distanceBetweenPoints_ = function(p1, p2) {
+  if (!p1 || !p2) {
+    return 0;
+  }
+
+  var R = 6371; // Radius of the Earth in km
+  var dLat = (p2.lat() - p1.lat()) * Math.PI / 180;
+  var dLon = (p2.lng() - p1.lng()) * Math.PI / 180;
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(p1.lat() * Math.PI / 180) * Math.cos(p2.lat() * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  var d = R * c;
+  return d * 1000;
+};
+
+RadiusWidget.prototype.setDistance = function() {
+  // As the sizer is being dragged, its position changes.  Because the
+  // RadiusWidget's sizer_position is bound to the sizer's position, it will
+  // change as well.
+  var pos = this.get('sizer_position');
+  var center = this.get('center');
+  var distance = this.distanceBetweenPoints_(center, pos);
+
+  // Set the distance property for any objects that are bound to it
+  this.set('distance', distance);
+};
+
+function myDistance(p1, p2) {
+  if (!p1 || !p2) {
+    return 0;
+  }
+
+  var R = 6371; // Radius of the Earth in km
+  var dLat = (p2.lat() - p1.lat()) * Math.PI / 180;
+  var dLon = (p2.lng() - p1.lng()) * Math.PI / 180;
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(p1.lat() * Math.PI / 180) * Math.cos(p2.lat() * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  var d = R * c;
+  return d * 1000;
+}
+
+
+// for reference
 function success(position) {
   var mapcanvas = document.createElement('div');
   mapcanvas.id = 'mapcanvas';
@@ -211,11 +367,5 @@ function success(position) {
       map: map, 
       title:"You are here! (at least within a "+position.coords.accuracy+" meter radius)"
   });
-
-  // var marker2 = new google.maps.Marker({
-  //     position: new google.maps.LatLng(position.coords.latitude+0.001, position.coords.longitude+0.001),
-  //     map: map, 
-  //     title:"You are here! (at least within a "+position.coords.accuracy+" meter radius)"
-  // });
 
 }

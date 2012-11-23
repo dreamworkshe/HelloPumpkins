@@ -1,19 +1,45 @@
+<!-- Map page -->
 
-
-<div data-role="page" data-title="Home">
-	<div data-role="header" data-theme="b">
+<div data-role="page" data-title="Home" id="map_page">
+	<div data-role="header" data-theme="b" data-position="fixed">
 		<a href="/login" data-iconpos="notext" data-icon="home"></a>
 		<h1>Welcome</h1>
 	</div>
 	<div data-role="content" class="a_page">	
 		<h1 id="username"><%= session[:name] %></h1>
+		<div id="radius_display_block"></div>
 		<center><div id="map_container"></div></center>
 	</div>
-	<div data-role="footer" data-theme="b">
-		<h1>Ubicomp 2012 Fall</h1>
+	<div data-role="footer" data-theme="b" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="/enter#map_page" class="ui-btn-active ui-state-persist">My Map</a></li>
+				<li><a href="/enter#list_page">My List</a></li>
+			</ul>
+		</div>
 	</div>
 	
 	<%= javascript_include_tag "enter" %>
+</div>
+
+<!-- List page -->
+
+<div data-role="page" data-title="Home" id="list_page">
+	<div data-role="header" data-theme="b" data-position="fixed">
+		<a href="/login" data-iconpos="notext" data-icon="home"></a>
+		<h1>Welcome</h1>
+	</div>
+	<div data-role="content" class="a_page">	
+		<h1 id="username"><%= session[:name] %></h1>
+	</div>
+	<div data-role="footer" data-theme="b" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="/enter#map_page">My Map</a></li>
+				<li><a href="/enter#list_page" class="ui-btn-active ui-state-persist">My List</a></li>
+			</ul>
+		</div>
+	</div>
 </div>
 
 

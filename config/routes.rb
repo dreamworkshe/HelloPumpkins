@@ -11,7 +11,8 @@ Checkin::Application.routes.draw do
   match '/signout', to: 'sessions#destroy'
   match '/login', to: 'members#new'
   match '/login/auth', to: 'members#auth'
-  match '/login/enter', to: 'members#enter'
+  match '/enter', to: 'members#enter'
+  match '/list', to: 'members#list'
   match '/pos', to: 'members#pos'
   get "static_pages/home"
   get "static_pages/help"

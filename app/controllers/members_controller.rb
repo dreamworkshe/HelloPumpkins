@@ -34,6 +34,13 @@ class MembersController < ApplicationController
 		end
 	end
 
+	def list
+		if session[:name] == nil
+			redirect_to action: new
+		end
+		
+	end
+
 	def auth
 		Pusher.app_id = '31527'
   	Pusher.key = '0b7f4e07db19c4ba312d'

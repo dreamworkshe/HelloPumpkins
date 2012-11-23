@@ -4,7 +4,7 @@
 		<h1>Welcome</h1>
 	</div>
 	<div data-role="content" data-theme="b" class="a_page">
-		<%= form_for(:member, url: '/login/enter') do |f| %>
+		<%= form_for(:member, url: '/enter') do |f| %>
 			<%= f.label "Enter your name:" %>
 			<%= f.text_field :name %>
 			<%= f.submit "Login" %>
