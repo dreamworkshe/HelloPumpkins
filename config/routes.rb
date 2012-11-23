@@ -12,6 +12,7 @@ Checkin::Application.routes.draw do
   match '/login', to: 'members#new'
   match '/login/auth', to: 'members#auth'
   match '/login/enter', to: 'members#enter'
+  match '/pos', to: 'members#pos'
   get "static_pages/home"
   get "static_pages/help"
 

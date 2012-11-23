@@ -26,7 +26,7 @@ class MembersController < ApplicationController
 	end
 
 	def enter
-		print "receive post!\n"
+		#print "receive post!\n"
 	end
 
 	def auth
@@ -37,5 +37,20 @@ class MembersController < ApplicationController
         user_id: session[:id] , user_info: {user_name: session[:name]} } )
 		#Pusher[params[:channel_name]].trigger!('haha', {});
 		render :json => response
+  end
+
+  def pos
+  	who = session[:name]
+  	lat = params[:latitude].to_f
+  	lon = params[:longitude].to_f
+
+  	puts "Get position from " + who + ": (" + lat.to_s + ", " + lon.to_s + ")"
+  	
+  	if who == "yaotest"
+      lat += 0.002 * rand() - 0.001
+      lon += 0.002 * rand() - 0.001
+    end
+
+  	Pusher['presence-map-channel'].trigger!('updateMap', {name: who, latitude: lat, longitude: lon});
   end
 end

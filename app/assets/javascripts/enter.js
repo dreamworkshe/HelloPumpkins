@@ -1,48 +1,113 @@
+// global variables
+var MAPCANVAS;
+var Markers = new Array();
+
+// get username
+var Name = $('#username').text();
+
+// start monitoring position
 if (navigator.geolocation) {
-  //monitorPosition();
-	//navigator.geolocation.getCurrentPosition(success, error);
+  setupChannel();
+  setupMap(); //monitorPosition after successfully setup map!
 } else {
-	error('not supported');
+	alert('Please turn on location service');
 }
 
-Pusher.channel_auth_endpoint = '/login/auth';
-var pusher = new Pusher('0b7f4e07db19c4ba312d');
-var channel = pusher.subscribe('presence-map-channel');
+// set up channel
+function setupChannel() {
+  Pusher.channel_auth_endpoint = '/login/auth';
+  var pusher = new Pusher('0b7f4e07db19c4ba312d');
+  var channel = pusher.subscribe('presence-map-channel');
 
-channel.bind('pusher:subscription_succeeded', function(members) {
+  channel.bind('pusher:subscription_succeeded', function(members) {
 
-});
+  });
 
-channel.bind('pusher:member_added', function(member) {
+  channel.bind('pusher:member_added', function(member) {
 
-});
+  });
 
-channel.bind('pusher:member_removed', function(member) {
+  channel.bind('pusher:member_removed', function(member) {
 
-});
+  });
+
+  // event for updating postions
+  channel.bind('updateMap', function(data) {
+    var who = data.name, lat = data.latitude, lon = data.longitude;
+    console.log(who + " " + lat + " " + lon);
+    var latlng = new google.maps.LatLng(lat, lon);
+
+    var i;
+    for (i = 0; i < Markers.length; i++) {
+      if (Markers[i].name == who) {
+        Markers[i].marker.setPosition(latlng);
+        break;
+      }
+    }
+    console.log(Markers.length);
+    if (i == Markers.length) {
+      var marker = new google.maps.Marker({
+        position: latlng, 
+        map: MAPCANVAS
+      });
+      var markerpair = {name: who, marker: marker};
+      Markers.push(markerpair);
+    }
+
+  });
+}
+
+// set up map canvas
+function setupMap() {
+  navigator.geolocation.getCurrentPosition(function(position) {
+    var mapcanvas = document.createElement('div');
+    mapcanvas.id = 'mapcanvas';
+    var map_width = $('#map_container').width() * 0.8,
+    map_height = map_width * 0.8;
+    mapcanvas.style.width = map_width + 'px';
+    mapcanvas.style.height = map_height + 'px';
+    $('#map_container').append(mapcanvas);
+    var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+    var options = {
+      zoom: 17,
+      center: latlng,
+      mapTypeControl: false,
+      navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    MAPCANVAS = new google.maps.Map(document.getElementById("mapcanvas"), options);
+    monitorPosition();
+  }, error);
+}
 
 
-
-channel.bind('client-123', function(member) {
-  console.log('yes');
-});
-
-
+// monitor function
 var lastlat = 0, lastlon = 0;
-
 function monitorPosition() {
   navigator.geolocation.getCurrentPosition(function(position) {
     var lat = position.coords.latitude, lon = position.coords.longitude;
     if (lastlat != 0 && lastlon != 0) {
-      alert(1000*distance(lat, lon, lastlat, lastlon));
+      //alert(1000*distance(lat, lon, lastlat, lastlon));
       //alert(lat + " " + lon);
     }
     lastlat = lat;
     lastlon = lon;
-    setTimeout(monitorPosition, 3000);
+    sendPosition(lat, lon);
   }, function() {
     alert('error');
   });
+}
+
+// send current position to server
+function sendPosition(lat, lon) {
+  $.ajax({
+    type: "POST",
+    url : "/pos",
+    cache: false,
+    data: {latitude: lat, longitude: lon},
+    success: function() {  setTimeout(monitorPosition, 3000); },
+    error: function(xhr){  alert("sendPosition error"); }        
+ });
 }
 
 
@@ -73,6 +138,7 @@ function monitorPosition() {
 //:::               GeoDataSource.com (C) All Rights Reserved 2012            :::
 //:::                                                                         :::
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 
 function distance(lat1, lon1, lat2, lon2) {
   var radlat1 = Math.PI * lat1/180;
@@ -108,8 +174,8 @@ function distance2(lat1, lon1, lat2, lon2) {
 
 
 
-function error(msg) {
-	alert("error!");
+function error() {
+	alert('error!');
 }
 
 function success(position) {
