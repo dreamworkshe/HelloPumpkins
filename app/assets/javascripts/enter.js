@@ -28,10 +28,17 @@ channel.bind('client-123', function(member) {
 });
 
 
+var lastlat = 0, lastlon = 0;
+
 function monitorPosition() {
   navigator.geolocation.getCurrentPosition(function(position) {
     var lat = position.coords.latitude, lon = position.coords.longitude;
-    alert(lat + " " + lon);
+    if (lastlat != 0 && lastlon != 0) {
+      alert(1000*distance(lat, lon, lastlat, lastlon));
+      //alert(lat + " " + lon);
+    }
+    lastlat = lat;
+    lastlon = lon;
     setTimeout(monitorPosition, 3000);
   }, function() {
     alert('error');
@@ -83,7 +90,21 @@ function distance(lat1, lon1, lat2, lon2) {
   if (unit=="K") { dist = dist * 1.609344; }
   if (unit=="N") { dist = dist * 0.8684; }
   return dist;
-}                                                                           
+}       
+
+rad = function(x) {return x*Math.PI/180;}
+
+function distance2(lat1, lon1, lat2, lon2) {
+  var R = 6371; // Radius of the Earth in km
+  var dLat = rad(lat1 - lat2) * Math.PI / 180;
+  var dLon = rad(lon1 - lon2) * Math.PI / 180;
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(rad(lat1)) * Math.cos(rad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  var d = R * c;
+  return d;
+};                                                                    
 
 
 
