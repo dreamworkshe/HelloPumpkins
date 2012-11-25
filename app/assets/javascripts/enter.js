@@ -53,7 +53,8 @@ function setupChannel() {
     var i;
     for (i = 0; i < Members.length; i++) {
       if (Members[i].id == id) {
-        Members[i].marker.setPosition(latlng);
+        console.log("change " + who);
+        Members[i].marker.set('position', latlng);
         
         // others, should check distance
         if (who != NAME) {
@@ -67,28 +68,44 @@ function setupChannel() {
 
     // if member not found, add a member
     if (i == Members.length) {
-      // var marker = new google.maps.Marker({
-      //   position: latlng, 
-      //   map: MAPCANVAS,
-      //   icon: new google.maps.MarkerImage("/assets/happy.png")
-      // });
-      var marker = new MarkerWithLabel({
+
+      var marker = new google.maps.Marker({
         position: latlng, 
         map: MAPCANVAS,
-        icon: new google.maps.MarkerImage("/assets/happy.png"),
-        labelContent: who,
-        labelAnchor: new google.maps.Point(22, 0),
-        labelClass: "labels", // the CSS class for the label
-        labelStyle: {opacity: 0.75}
+        icon: new google.maps.MarkerImage("/assets/happy.png")
       });
-      
+
+
+      var mapLabel = new MapLabel({
+        text: who,
+        position: latlng,
+        map: MAPCANVAS,
+        fontSize: 12,
+        align: 'center'
+      });
+
+      marker.bindTo('map', mapLabel);
+      marker.bindTo('position', mapLabel);
+
+
       var memberinfo;
+
+      // var marker = new MarkerWithLabel({
+      //     position: latlng, 
+      //     map: MAPCANVAS,
+      //     icon: new google.maps.MarkerImage("/assets/witch_hat.png"),
+      //     labelContent: who,
+      //     labelAnchor: new google.maps.Point(22, 0),
+      //     labelClass: "labels", // the CSS class for the label
+      //     labelStyle: {opacity: 0.75}
+      // });
 
       // if member is self, add a distanceWidget, change picture
       if (who == NAME) {
         marker.setIcon(new google.maps.MarkerImage("/assets/witch_hat.png"));
+
         My_marker = marker;
-        var distanceWidget = new DistanceWidget(MAPCANVAS, marker);
+        var distanceWidget = new DistanceWidget(MAPCANVAS, marker, mapLabel);
         google.maps.event.addListener(distanceWidget, 'distance_changed', function() {
           RADIUS = distanceWidget.get('distance');
           $('#radius_display_block').text("My radar: " + RADIUS.toFixed(0) + "m");
@@ -225,7 +242,27 @@ function error() {
 
 
 
-function DistanceWidget(map, marker) {
+// function LabelWidget(map, marker, who) {
+//   this.set('map', map);
+//   this.set('position', marker.getPosition());
+
+//   this.bindTo('map', marker);
+//   this.bindTo('position', marker);
+
+//   var mapLabel = new MapLabel({
+//     text: who,
+//     position: marker.getPosition(),
+//     map: map,
+//     fontSize: 12,
+//     align: 'center'
+//   });
+
+//   mapLabel.bindTo('map', this);
+//   mapLabel.bindTo('position', this);
+// }
+// LabelWidget.prototype = new google.maps.MVCObject();
+
+function DistanceWidget(map, marker, label) {
   this.set('map', map);
   this.set('position', marker.getPosition());
 
@@ -251,6 +288,10 @@ function DistanceWidget(map, marker) {
 
   // Bind to the radiusWidgets' bounds property
   this.bindTo('bounds', radiusWidget);
+
+  // !!
+  this.bindTo('map', label);
+  this.bindTo('position', label);
 }
 DistanceWidget.prototype = new google.maps.MVCObject();
 
