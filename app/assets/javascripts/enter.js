@@ -126,10 +126,12 @@ function setupMap() {
   navigator.geolocation.getCurrentPosition(function(position) {
     var mapcanvas = document.createElement('div');
     mapcanvas.id = 'mapcanvas';
-    var map_width = $(window).width() * 1,
-    map_height = $(window).height() * 0.75;
-    mapcanvas.style.width = map_width + 'px';
-    mapcanvas.style.height = map_height + 'px';
+    // var map_width = $(window).width() * 1,
+    // map_height = $(window).height() * 0.75;
+    // mapcanvas.style.width = map_width + 'px';
+    // mapcanvas.style.height = map_height + 'px';
+    mapcanvas.style.width = '100%';
+    mapcanvas.style.height = '100%';
     $('#map_container').append(mapcanvas);
     var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
     var options = {
