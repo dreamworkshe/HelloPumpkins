@@ -1,6 +1,7 @@
 // global variables
 var MAPCANVAS;
-var Members = new Array();
+var Members = new Array(); // for map
+var MembersSorted = new Array(); // for list
 var RADIUS = 50;
 var My_marker;
 
@@ -53,6 +54,7 @@ function setupChannel() {
     for (i = 0; i < Members.length; i++) {
       if (Members[i].id == id) {
         Members[i].marker.setPosition(latlng);
+        
         // others, should check distance
         if (who != NAME) {
           if (RADIUS >= myDistance(My_marker.getPosition(), Members[i].marker.getPosition())) {
@@ -63,16 +65,28 @@ function setupChannel() {
       }
     }
 
-    // if member not found
+    // if member not found, add a member
     if (i == Members.length) {
-      var marker = new google.maps.Marker({
+      // var marker = new google.maps.Marker({
+      //   position: latlng, 
+      //   map: MAPCANVAS,
+      //   icon: new google.maps.MarkerImage("/assets/happy.png")
+      // });
+      var marker = new MarkerWithLabel({
         position: latlng, 
-        map: MAPCANVAS
+        map: MAPCANVAS,
+        icon: new google.maps.MarkerImage("/assets/happy.png"),
+        labelContent: who,
+        labelAnchor: new google.maps.Point(22, 0),
+        labelClass: "labels", // the CSS class for the label
+        labelStyle: {opacity: 0.75}
       });
+      
       var memberinfo;
 
-      // add member, if member is self, add a distanceWidget
+      // if member is self, add a distanceWidget, change picture
       if (who == NAME) {
+        marker.setIcon(new google.maps.MarkerImage("/assets/witch_hat.png"));
         My_marker = marker;
         var distanceWidget = new DistanceWidget(MAPCANVAS, marker);
         google.maps.event.addListener(distanceWidget, 'distance_changed', function() {
@@ -139,7 +153,7 @@ function sendPosition(lat, lon) {
     cache: false,
     data: {latitude: lat, longitude: lon},
     success: function() {  setTimeout(monitorPosition, 3000); },
-    error: function(xhr){  alert("sendPosition error"); }        
+    error: function(xhr){  alert("note: sendPosition error"); }        
  });
 }
 
@@ -271,7 +285,8 @@ RadiusWidget.prototype.distance_changed = function() {
 RadiusWidget.prototype.addSizer_ = function() {
   var sizer = new google.maps.Marker({
     draggable: true,
-    title: 'Drag me!'
+    title: 'Drag me!',
+    icon: new google.maps.MarkerImage("/assets/witch_stick.png")
   });
 
   sizer.bindTo('map', this);

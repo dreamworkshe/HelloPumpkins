@@ -1,16 +1,18 @@
+
+
 <div data-role="page" data-title="Home">
 	<div data-role="header" data-theme="b">
 		<a href="/login" data-iconpos="notext" data-icon="home"></a>
 		<h1>Welcome</h1>
 	</div>
 	<div data-role="content" data-theme="b" class="a_page">
-		<%= form_for(:member, url: '/enter') do |f| %>
+		<%= form_for(:member, url: '/enter', html: {id: 'middle'}) do |f| %>
 			<%= f.label "Enter your name:" %>
 			<%= f.text_field :name %>
 			<%= f.submit "Login" %>
 		<% end %>
 	</div>
-	<div data-role="footer" data-theme="b">
+	<div data-role="footer" data-theme="b" data-position="fixed">
 		<h1>Ubicomp 2012 Fall</h1>
 	</div>
 </div>

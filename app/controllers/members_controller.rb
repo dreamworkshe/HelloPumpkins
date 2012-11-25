@@ -5,7 +5,7 @@ class MembersController < ApplicationController
 
 	def new
 		if session[:name] != nil
-		 	render 'enter'
+		 	redirect_to action: 'enter'
 		end
 	end
 
@@ -17,6 +17,11 @@ class MembersController < ApplicationController
 		end
 		render 'enter'
 		#redirect_to :action => :enter
+	end
+
+	def exit
+		reset_session
+		redirect_to action: 'new'
 	end
 
 	def chat
@@ -34,12 +39,11 @@ class MembersController < ApplicationController
 		end
 	end
 
-	def list
-		if session[:name] == nil
-			redirect_to action: new
-		end
-		
-	end
+	# def list
+	# 	if session[:name] == nil
+	# 		redirect_to action: new
+	# 	end
+	# end
 
 	def auth
 		Pusher.app_id = '31527'
