@@ -219,7 +219,9 @@ function setupMap() {
       center: latlng,
       mapTypeControl: false,
       navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
-      mapTypeId: google.maps.MapTypeId.ROADMAP
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      zoomControl: false,
+      streetViewControl: false
     };
     MAPCANVAS = new google.maps.Map(document.getElementById("map_container"), options);
     monitorPosition();
@@ -400,7 +402,10 @@ DistanceWidget.prototype = new google.maps.MVCObject();
 
 function RadiusWidget() {
   var circle = new google.maps.Circle({
-    strokeWeight: 2
+    strokeColor: "yellow",
+    fillColor: "blue",
+    strokeWeight: 0,
+    fillOpacity: 0.2
   });
 
   // Set the distance property value, default to 10m.
