@@ -1,18 +1,30 @@
 // global variables
 var MAPCANVAS;
-var Members = new Array(); // for map
-var MembersSorted = new Array(); // for list
-var RADIUS = 50;
+var Members; // for map
+var Members_list; // for list
+var RADIUS;
 var My_marker;
+var pusher;
 
 // get username
 var NAME;
 
+
+// window.addEventListener("load", function() {
+//   setTimeout(function() {
+//     window.scrollTo(0, 1);
+//   }, 0);
+// });
+
 $(document).ready(function() {
   NAME = $('#username').text();
+  Members = new Array();
+  Members_list = new Array();
+  RADIUS = 30;
   $('#radius_display_block').text("My radar: " + RADIUS.toFixed(0) + "m");
   if (navigator.geolocation) {
     setupChannel();
+    setupChat();
     setupMap(); //monitorPosition after successfully setup map!
   } else {
   	alert('Please turn on location service');
@@ -22,7 +34,7 @@ $(document).ready(function() {
 // set up channel
 function setupChannel() {
   Pusher.channel_auth_endpoint = '/login/auth';
-  var pusher = new Pusher('0b7f4e07db19c4ba312d');
+  pusher = new Pusher('0b7f4e07db19c4ba312d');
   var channel = pusher.subscribe('presence-map-channel');
 
   channel.bind('pusher:subscription_succeeded', function(members) {
@@ -39,6 +51,17 @@ function setupChannel() {
         Members[i].marker.setMap(null);
         Members.splice(i, 1);
         break;
+      }
+    }
+
+    for (var i = 0; i < Members_list.length; i++) {
+      if (Members_list[i].name == member.info.user_name) {
+        if (Members_list[i].isNear) {
+          console.log('here');
+          $('li#member_' + Members_list[i].name).remove();
+          $('#members_list').listview('refresh');
+        }
+        Members_list.splice(i, 1);
       }
     }
   });
@@ -58,8 +81,46 @@ function setupChannel() {
         
         // others, should check distance
         if (who != NAME) {
+          var near;
           if (RADIUS >= myDistance(My_marker.getPosition(), Members[i].marker.getPosition())) {
             console.log(Members[i].name + " is near!");
+            // set pumpkin
+            Members[i].marker.set('icon', new google.maps.MarkerImage("/assets/happy.png"));
+            near = true;
+          } else {
+            // set normal
+            Members[i].marker.set('icon', new google.maps.MarkerImage("/assets/smile.png"));
+            near = false;
+          }
+          var j;
+          // found member
+          for (j = 0; j < Members_list.length; j++) {
+            if (Members_list[j].name == who) {
+              if (Members_list[j].isNear != near) {
+                // do list update
+                if (near) {
+                  //console.log('here');
+                  $('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
+                } else {
+                  $('li#member_' + who).remove();
+                }
+                $('#members_list').listview('refresh');
+                Members_list[j].isNear = near;
+              }
+              break;
+            }
+          }
+          // add a new member
+          if (j == Members_list.length) {
+            //console.log("here");
+            var mem = {name: who, isNear: near};
+            Members_list.push(mem);
+            if (near) {
+              //console.log('here');
+              $('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
+              //$('#members_list').append('<li>test</li>');
+              $('#members_list').listview('refresh');
+            }
           }
         }
         break;
@@ -72,7 +133,7 @@ function setupChannel() {
       var marker = new google.maps.Marker({
         position: latlng, 
         map: MAPCANVAS,
-        icon: new google.maps.MarkerImage("/assets/happy.png")
+        icon: new google.maps.MarkerImage("/assets/happy_128.png", null, null, null, new google.maps.Size(32, 32))
       });
 
 
@@ -102,7 +163,8 @@ function setupChannel() {
 
       // if member is self, add a distanceWidget, change picture
       if (who == NAME) {
-        marker.setIcon(new google.maps.MarkerImage("/assets/witch_hat.png"));
+        //marker.setIcon(new google.maps.MarkerImage("/assets/witch_hat.png"));
+        marker.setIcon(new google.maps.MarkerImage("/assets/witch_hat_128.png", null, null, null, new google.maps.Size(32, 32)));
 
         My_marker = marker;
         var distanceWidget = new DistanceWidget(MAPCANVAS, marker, mapLabel);
@@ -120,28 +182,46 @@ function setupChannel() {
   });
 }
 
+
+// set up chat room
+function setupChat() {
+  $('#messages_container').width($(window).width());
+  var useragent = navigator.userAgent;
+  if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
+    $('#messages_container').height('250px');
+  } else {
+    $('#messages_container').height('550px');
+  }
+}
+
 // set up map canvas
 function setupMap() {
   //console.log("here");
   navigator.geolocation.getCurrentPosition(function(position) {
-    var mapcanvas = document.createElement('div');
-    mapcanvas.id = 'mapcanvas';
+    // var mapcanvas = document.createElement('div');
+    // mapcanvas.id = 'mapcanvas';
     // var map_width = $(window).width() * 1,
     // map_height = $(window).height() * 0.75;
     // mapcanvas.style.width = map_width + 'px';
     // mapcanvas.style.height = map_height + 'px';
-    mapcanvas.style.width = '100%';
-    mapcanvas.style.height = '100%';
-    $('#map_container').append(mapcanvas);
+    // $('#map_container').append(mapcanvas);
+    $('#map_container').width('100%');
+
+    var useragent = navigator.userAgent;
+    if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
+      $('#map_container').height('300px');
+    } else {
+      $('#map_container').height('600px');
+    }
     var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
     var options = {
-      zoom: 17,
+      zoom: 19,
       center: latlng,
       mapTypeControl: false,
       navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
-    MAPCANVAS = new google.maps.Map(document.getElementById("mapcanvas"), options);
+    MAPCANVAS = new google.maps.Map(document.getElementById("map_container"), options);
     monitorPosition();
   }, error);
 }
@@ -174,6 +254,27 @@ function sendPosition(lat, lon) {
     success: function() {  setTimeout(monitorPosition, 3000); },
     error: function(xhr){  alert("note: sendPosition error"); }        
  });
+}
+
+function showListContainer() {
+  //$('#radar_container').hide('slide');
+  //$('#list_container').show('slide');
+  // $('#radar_container').fadeOut();
+  // $('#list_container').fadeIn();
+  if ($('#list_container').is(':hidden')) {
+    $('#radar_container').hide(0);
+    $('#list_container').slideToggle(600);
+  }
+}
+
+function showRadarContainer() {
+  //$('#list_container').hide('slide');
+  //$('#radar_container').show('slide');
+  if ($('#radar_container').is(':hidden')) {
+    $('#list_container').hide(0);
+    $('#radar_container').slideToggle(600);
+    google.maps.event.trigger(MAPCANVAS, 'resize');
+  }
 }
 
 
@@ -329,16 +430,22 @@ RadiusWidget.prototype.addSizer_ = function() {
   var sizer = new google.maps.Marker({
     draggable: true,
     title: 'Drag me!',
-    icon: new google.maps.MarkerImage("/assets/witch_stick.png")
+    icon: new google.maps.MarkerImage("/assets/witch_stick_128.png", null, null, null, new google.maps.Size(32, 32))
   });
 
   sizer.bindTo('map', this);
   sizer.bindTo('position', this, 'sizer_position');
+
+
   var me = this;
   google.maps.event.addListener(sizer, 'drag', function() {
     // Set the circle distance (radius)
     me.setDistance();
   });
+
+  //!!
+  //var labelWidget = new LabelWidget(sizer);
+
 };
 
 RadiusWidget.prototype.center_changed = function() {
@@ -397,6 +504,28 @@ function myDistance(p1, p2) {
   var d = R * c;
   return d * 1000;
 }
+
+// function LabelWidget(marker) {
+//   this.set('map', marker);
+//   this.set('position', marker);
+//   var mapLabel = new MapLabel({
+//     text: '123',
+//     fontSize: 12,
+//     align: 'center'
+//   });
+//   marker.bindTo('map', mapLabel);
+//   marker.bindTo('position', mapLabel);
+// }
+// LabelWidget.prototype = new google.maps.MVCObject();
+
+// LabelWidget.prototype.position_changed = function() {
+//   //this.mlabel.setPosition(this.get('position'));
+// }
+
+// LabelWidget.prototype.map_changed = function() {
+//   alert(this.a);
+//   //this.mlabel.setMap(this.get('map'));
+// }
 
 
 // for reference
