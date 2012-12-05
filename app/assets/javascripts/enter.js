@@ -16,16 +16,27 @@ var NAME;
 //   }, 0);
 // });
 
+
+
 $(document).ready(function() {
+
+  $.mobile.loading( 'show', {
+    text: 'Loading...',
+    textVisible: true,
+    theme: 'a',
+    html: ""
+  });
+
+
   NAME = $('#username').text();
   Members = new Array();
   Members_list = new Array();
   RADIUS = 30;
   $('#radius_display_block').text("My radar: " + RADIUS.toFixed(0) + "m");
   if (navigator.geolocation) {
-    setupChannel();
-    setupChat();
-    setupMap(); //monitorPosition after successfully setup map!
+    setupChannel(); // others follow setupChannel()
+    //setupChat();
+    //setupMap(); //monitorPosition after successfully setup map!
   } else {
   	alert('Please turn on location service');
   }
@@ -38,7 +49,7 @@ function setupChannel() {
   var channel = pusher.subscribe('presence-map-channel');
 
   channel.bind('pusher:subscription_succeeded', function(members) {
-
+    setupMap();
   });
 
   channel.bind('pusher:member_added', function(member) {
@@ -76,7 +87,6 @@ function setupChannel() {
     var i;
     for (i = 0; i < Members.length; i++) {
       if (Members[i].id == id) {
-        console.log("change " + who);
         Members[i].marker.set('position', latlng);
         
         // others, should check distance
@@ -99,11 +109,11 @@ function setupChannel() {
               if (Members_list[j].isNear != near) {
                 // do list update
                 if (near) {
-                  //console.log('here');
                   $('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
                 } else {
                   $('li#member_' + who).remove();
                 }
+                // important!!
                 $('#members_list').listview('refresh');
                 Members_list[j].isNear = near;
               }
@@ -112,13 +122,10 @@ function setupChannel() {
           }
           // add a new member
           if (j == Members_list.length) {
-            //console.log("here");
             var mem = {name: who, isNear: near};
             Members_list.push(mem);
             if (near) {
-              //console.log('here');
               $('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
-              //$('#members_list').append('<li>test</li>');
               $('#members_list').listview('refresh');
             }
           }
@@ -136,7 +143,6 @@ function setupChannel() {
         icon: new google.maps.MarkerImage("/assets/happy_128.png", null, null, null, new google.maps.Size(32, 32))
       });
 
-
       var mapLabel = new MapLabel({
         text: who,
         position: latlng,
@@ -148,18 +154,7 @@ function setupChannel() {
       marker.bindTo('map', mapLabel);
       marker.bindTo('position', mapLabel);
 
-
       var memberinfo;
-
-      // var marker = new MarkerWithLabel({
-      //     position: latlng, 
-      //     map: MAPCANVAS,
-      //     icon: new google.maps.MarkerImage("/assets/witch_hat.png"),
-      //     labelContent: who,
-      //     labelAnchor: new google.maps.Point(22, 0),
-      //     labelClass: "labels", // the CSS class for the label
-      //     labelStyle: {opacity: 0.75}
-      // });
 
       // if member is self, add a distanceWidget, change picture
       if (who == NAME) {
@@ -177,8 +172,9 @@ function setupChannel() {
         memberinfo = {name: who, id: id, marker: marker, latitude: lat, longitude: lon};
       } 
       Members.push(memberinfo);
-    }
 
+      $.mobile.loading('hide');
+    }
   });
 }
 
@@ -196,8 +192,9 @@ function setupChat() {
 
 // set up map canvas
 function setupMap() {
-  //console.log("here");
+  
   navigator.geolocation.getCurrentPosition(function(position) {
+
     // var mapcanvas = document.createElement('div');
     // mapcanvas.id = 'mapcanvas';
     // var map_width = $(window).width() * 1,
@@ -213,17 +210,44 @@ function setupMap() {
     } else {
       $('#map_container').height('600px');
     }
+
     var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
     var options = {
-      zoom: 19,
+      zoom: 18,
       center: latlng,
       mapTypeControl: false,
       navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
       mapTypeId: google.maps.MapTypeId.ROADMAP,
-      zoomControl: false,
+      // zoomControl: false,
       streetViewControl: false
     };
     MAPCANVAS = new google.maps.Map(document.getElementById("map_container"), options);
+    google.maps.event.trigger(MAPCANVAS, 'resize');
+    // init self marker here!!
+    // var marker = new google.maps.Marker({
+    //   position: latlng, 
+    //   map: MAPCANVAS,
+    //   icon: new google.maps.MarkerImage("/assets/witch_hat_128.png", null, null, null, new google.maps.Size(32, 32))
+    // });
+
+    // var mapLabel = new MapLabel({
+    //   text: who,
+    //   position: latlng,
+    //   map: MAPCANVAS,
+    //   fontSize: 12,
+    //   align: 'center'
+    // });
+
+    // My_marker = marker;
+    // var distanceWidget = new DistanceWidget(MAPCANVAS, marker, mapLabel);
+    // google.maps.event.addListener(distanceWidget, 'distance_changed', function() {
+    //   RADIUS = distanceWidget.get('distance');
+    //   $('#radius_display_block').text("My radar: " + RADIUS.toFixed(0) + "m");
+    // });
+    // memberinfo = {name: who, id: id, marker: marker, latitude: lat, longitude: lon, widget: distanceWidget};
+    // Members.push(memberinfo);
+    // finished initing
+    // console.log("here");
     monitorPosition();
   }, error);
 }
@@ -254,7 +278,7 @@ function sendPosition(lat, lon) {
     cache: false,
     data: {latitude: lat, longitude: lon},
     success: function() {  setTimeout(monitorPosition, 3000); },
-    error: function(xhr){  alert("note: sendPosition error"); }        
+    error: function(xhr){  setTimeout(monitorPosition, 3000); alert("note: sendPosition error"); }        
  });
 }
 

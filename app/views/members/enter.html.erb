@@ -24,11 +24,13 @@
 	<div data-role="content" class="a_page">	
 		<div id="username" style="display:none;"><%= session[:name] %></div>
 		
+		<!-- map -->
 		<div id="radar_container">
-			<div id="radius_display_block"></div>
+			<div>Notifications: off</div><div id="radius_display_block"></div>
 			<center><div id="map_container"></div></center>
 		</div>
 
+		<!-- list -->
 		<div id="list_container" style="display:none;">
 			<ul id="members_list" data-role="listview" data-inset="true" data-theme="d" data-divider-theme="e">
 				<li data-role="list-divider">Who's around me?</li>
