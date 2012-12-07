@@ -19,14 +19,30 @@ var NAME;
 
 
 $(document).ready(function() {
-
-  $.mobile.loading( 'show', {
+  
+  // loading widget
+  $.mobile.loading('show', {
     text: 'Loading...',
     textVisible: true,
     theme: 'a',
     html: ""
   });
 
+  // detecting shaking
+  window.addEventListener('shake', shakeIt, false);
+  
+  $('#content_container').jrumble({
+    speed: 40,
+    rotation: 6
+  });
+  
+
+  $('#send_message_button').click(sendMessage);
+  $('#input_message').keypress(function(event) {
+    if (event.which == 13) {
+      sendMessage();
+    }
+  });
 
   NAME = $('#username').text();
   Members = new Array();
@@ -35,7 +51,7 @@ $(document).ready(function() {
   $('#radius_display_block').text("My radar: " + RADIUS.toFixed(0) + "m");
   if (navigator.geolocation) {
     setupChannel(); // others follow setupChannel()
-    //setupChat();
+    setupChat();
     //setupMap(); //monitorPosition after successfully setup map!
   } else {
   	alert('Please turn on location service');
@@ -68,7 +84,7 @@ function setupChannel() {
     for (var i = 0; i < Members_list.length; i++) {
       if (Members_list[i].name == member.info.user_name) {
         if (Members_list[i].isNear) {
-          console.log('here');
+          //console.log('here');
           $('li#member_' + Members_list[i].name).remove();
           $('#members_list').listview('refresh');
         }
@@ -93,16 +109,16 @@ function setupChannel() {
         if (who != NAME) {
           var near;
           if (RADIUS >= myDistance(My_marker.getPosition(), Members[i].marker.getPosition())) {
-            console.log(Members[i].name + " is near!");
+            // console.log(Members[i].name + " is near!");
             // set pumpkin
-            Members[i].marker.set('icon', new google.maps.MarkerImage("/assets/happy.png"));
+            // Members[i].marker.set('icon', new google.maps.MarkerImage("/assets/happy.png"));
             near = true;
           } else {
             // set normal
-            Members[i].marker.set('icon', new google.maps.MarkerImage("/assets/smile.png"));
+            // Members[i].marker.set('icon', new google.maps.MarkerImage("/assets/smile.png"));
             near = false;
           }
-          var j;
+          var j, appended = false;
           // found member
           for (j = 0; j < Members_list.length; j++) {
             if (Members_list[j].name == who) {
@@ -110,6 +126,7 @@ function setupChannel() {
                 // do list update
                 if (near) {
                   $('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
+                  appended = true;
                 } else {
                   $('li#member_' + who).remove();
                 }
@@ -126,8 +143,27 @@ function setupChannel() {
             Members_list.push(mem);
             if (near) {
               $('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
+              appended = true;
               $('#members_list').listview('refresh');
             }
+          }
+          // send notification
+          if (appended) {
+            var n = noty({
+              text: who + ' has just checked in!',
+              type: 'success',
+              dismissQueue: true,
+              layout: 'top',
+              theme: 'defaultTheme',
+              timeout: 2000
+            });
+          }
+
+          // dirty: to delay pumpkin after notification
+          if (near) {
+            Members[i].marker.set('icon', new google.maps.MarkerImage("/assets/happy.png"));
+          } else {
+            Members[i].marker.set('icon', new google.maps.MarkerImage("/assets/smile.png"));
           }
         }
         break;
@@ -176,15 +212,24 @@ function setupChannel() {
       $.mobile.loading('hide');
     }
   });
+
+  // event for shaking!!
+  channel.bind('shakeYourPage', function(data) {
+    $('#content_container').trigger('startRumble');
+    setTimeout(function() {
+      $('#content_container').trigger('stopRumble');
+    }, 2000);
+  });
 }
 
 
 // set up chat room
 function setupChat() {
-  $('#messages_container').width($(window).width());
+  //console.log("here");
+  //$('#messages_container').width($(window).width()*0.8);
   var useragent = navigator.userAgent;
   if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
-    $('#messages_container').height('250px');
+    $('#messages_container').height('180px');
   } else {
     $('#messages_container').height('550px');
   }
@@ -289,6 +334,7 @@ function showListContainer() {
   // $('#list_container').fadeIn();
   if ($('#list_container').is(':hidden')) {
     $('#radar_container').hide(0);
+    $('#chat_container').hide(0);
     $('#list_container').slideToggle(600);
   }
 }
@@ -298,9 +344,40 @@ function showRadarContainer() {
   //$('#radar_container').show('slide');
   if ($('#radar_container').is(':hidden')) {
     $('#list_container').hide(0);
+    $('#chat_container').hide(0);
     $('#radar_container').slideToggle(600);
     google.maps.event.trigger(MAPCANVAS, 'resize');
   }
+}
+
+function showChatContainer() {
+  if ($('#chat_container').is(':hidden')) {
+    $('#list_container').hide(0);
+    $('#radar_container').hide(0);
+    $('#chat_container').slideToggle(600);
+  }
+}
+
+function sendMessage() {
+  var msg = $('#input_message').val();
+  $('#input_message').val('');
+  appendMessage(NAME, msg);
+}
+
+function appendMessage(who, msg) {
+  $('#messages_container').append('<p><span>'+who+'</span>'+msg+'</p>');
+}
+
+function shakeIt () {
+  // send shaking event
+  $.ajax({
+    type: "POST",
+    url : "/shake",
+    cache: false//,
+    //success: function() {  },
+    //error: function(xhr){  setTimeout(monitorPosition, 3000); alert("note: sendPosition error"); }        
+  });
+
 }
 
 

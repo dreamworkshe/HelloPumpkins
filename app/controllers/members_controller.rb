@@ -69,4 +69,9 @@ class MembersController < ApplicationController
 
   	Pusher['presence-map-channel'].trigger!('updateMap', {id: session[:id], name: who, latitude: lat, longitude: lon});
   end
+
+  def shake
+  	#puts('received!')
+  	Pusher['presence-map-channel'].trigger!('shakeYourPage', {})
+  end
 end
