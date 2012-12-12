@@ -129,7 +129,9 @@ function setupChannel() {
               if (Members_list[j].isNear != near) {
                 // do list update
                 if (near) {
-                  $('#members_list').append('<li id="member_' + who +'">' + who + ' (' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ')</li>');
+                  //$('#members_list').append('<li id="member_' + who +'">' + who + '<span>' + date.getHours() + ':' + date.getMinutes() +  '</span></li>');
+                  //$('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
+                  //$('#members_list').append('<li id="member_' + who +'">' + who + ' (' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ')</li>');            
                   appended = true;
                 } else {
                   $('li#member_' + who).remove();
@@ -146,9 +148,11 @@ function setupChannel() {
             var mem = {name: who, isNear: near};
             Members_list.push(mem);
             if (near) {
-              $('#members_list').append('<li id="member_' + who +'">' + who + ' (' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ')</li>');
+              //$('#members_list').append('<li id="member_' + who +'">' + who + '<span>' + date.getHours() + ':' + date.getMinutes() +  '</span></li>');
+              //$('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
+              //$('#members_list').append('<li id="member_' + who +'">' + who + ' (' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ')</li>');
               appended = true;
-              $('#members_list').listview('refresh');
+              //$('#members_list').listview('refresh');
             }
           }
           // send notification
@@ -161,6 +165,13 @@ function setupChannel() {
               theme: 'defaultTheme',
               timeout: 2000
             });
+            var hour = date.getHours(), min = date.getMinutes();
+            if (hour < 10)
+              hour = '0' + hour;
+            if (min < 10)
+              min = '0' + min; 
+            $('#members_list').append('<li id="member_' + who +'">' + who + '<span>' + hour + ':' + min +  '</span></li>');
+            $('#members_list').listview('refresh');
           }
 
           // dirty: to delay pumpkin after notification
@@ -260,7 +271,7 @@ function setupChat() {
   if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
     $('#messages_container').height('180px');
   } else {
-    $('#messages_container').height('550px');
+    $('#messages_container').height('500px');
   }
   //$('#messages_container').css('text-shadow', '0px');
 }
