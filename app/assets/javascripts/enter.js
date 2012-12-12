@@ -30,13 +30,13 @@ $(document).ready(function() {
 
   // detecting shaking
   window.addEventListener('shake', shakeIt, false);
-  
+  // init jrumble
   $('#content_container').jrumble({
     speed: 40,
     rotation: 6
   });
   
-
+  // init chat settings
   $('#send_message_button').click(sendMessage);
   $('#input_message').keypress(function(event) {
     if (event.which == 13) {
@@ -44,11 +44,14 @@ $(document).ready(function() {
     }
   });
 
+  // init lightbox
+  $('a.lightbox').lightBox();
+
   NAME = $('#username').text();
   Members = new Array();
   Members_list = new Array();
   RADIUS = 30;
-  $('#radius_display_block').text("My radar: " + RADIUS.toFixed(0) + "m");
+  $('#radius_display_block').text("Radius: " + RADIUS.toFixed(0) + "m");
   if (navigator.geolocation) {
     setupChannel(); // others follow setupChannel()
     setupChat();
@@ -96,7 +99,7 @@ function setupChannel() {
   // event for updating postions
   channel.bind('updateMap', function(data) {
     var who = data.name, id = data.id, lat = data.latitude, lon = data.longitude;
-    console.log(who + " " + lat + " " + lon);
+    //console.log(who + " " + lat + " " + lon);
     var latlng = new google.maps.LatLng(lat, lon);
 
     // update the i-th member's info
@@ -120,12 +123,13 @@ function setupChannel() {
           }
           var j, appended = false;
           // found member
+          var date = new Date();
           for (j = 0; j < Members_list.length; j++) {
             if (Members_list[j].name == who) {
               if (Members_list[j].isNear != near) {
                 // do list update
                 if (near) {
-                  $('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
+                  $('#members_list').append('<li id="member_' + who +'">' + who + ' (' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ')</li>');
                   appended = true;
                 } else {
                   $('li#member_' + who).remove();
@@ -142,7 +146,7 @@ function setupChannel() {
             var mem = {name: who, isNear: near};
             Members_list.push(mem);
             if (near) {
-              $('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
+              $('#members_list').append('<li id="member_' + who +'">' + who + ' (' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ')</li>');
               appended = true;
               $('#members_list').listview('refresh');
             }
@@ -201,7 +205,7 @@ function setupChannel() {
         var distanceWidget = new DistanceWidget(MAPCANVAS, marker, mapLabel);
         google.maps.event.addListener(distanceWidget, 'distance_changed', function() {
           RADIUS = distanceWidget.get('distance');
-          $('#radius_display_block').text("My radar: " + RADIUS.toFixed(0) + "m");
+          $('#radius_display_block').text("Radius: " + RADIUS.toFixed(0) + "m");
         });
         memberinfo = {name: who, id: id, marker: marker, latitude: lat, longitude: lon, widget: distanceWidget};
       } else {
@@ -220,6 +224,31 @@ function setupChannel() {
       $('#content_container').trigger('stopRumble');
     }, 2000);
   });
+
+  // new message
+  channel.bind('newMessage', function(data) {
+    var from = data.who;
+    var msg = data.msg;
+    // self is recipient
+    if (from == NAME) {
+      appendMessage(from, msg);
+      return;
+    }
+
+    var list = data.list;
+    if (list == null || list.indexOf(NAME) == -1)
+      return;
+
+    // is recipient
+    for (var i = 0; i < Members.length; i++) {
+      if(from != Members[i].name)
+        continue;
+      dist = myDistance(My_marker.getPosition(), Members[i].marker.getPosition());
+      dist = dist.toFixed(0);
+      appendMessage(from+" ("+dist+"m away)", msg);
+      break;
+    }
+  });
 }
 
 
@@ -233,6 +262,7 @@ function setupChat() {
   } else {
     $('#messages_container').height('550px');
   }
+  //$('#messages_container').css('text-shadow', '0px');
 }
 
 // set up map canvas
@@ -323,15 +353,11 @@ function sendPosition(lat, lon) {
     cache: false,
     data: {latitude: lat, longitude: lon},
     success: function() {  setTimeout(monitorPosition, 3000); },
-    error: function(xhr){  setTimeout(monitorPosition, 3000); alert("note: sendPosition error"); }        
+    error: function(xhr){  setTimeout(monitorPosition, 3000); /*alert("note: sendPosition error");*/ }        
  });
 }
 
 function showListContainer() {
-  //$('#radar_container').hide('slide');
-  //$('#list_container').show('slide');
-  // $('#radar_container').fadeOut();
-  // $('#list_container').fadeIn();
   if ($('#list_container').is(':hidden')) {
     $('#radar_container').hide(0);
     $('#chat_container').hide(0);
@@ -340,8 +366,6 @@ function showListContainer() {
 }
 
 function showRadarContainer() {
-  //$('#list_container').hide('slide');
-  //$('#radar_container').show('slide');
   if ($('#radar_container').is(':hidden')) {
     $('#list_container').hide(0);
     $('#chat_container').hide(0);
@@ -359,13 +383,52 @@ function showChatContainer() {
 }
 
 function sendMessage() {
+  /*
   var msg = $('#input_message').val();
   $('#input_message').val('');
   appendMessage(NAME, msg);
+  */
+  var msg = $('#input_message').val();
+  $('#input_message').val('');
+  var namelist = new Array();
+  for (var i = 0; i < Members_list.length; i++) {
+    if (Members_list[i].isNear) {
+      namelist.push(Members_list[i].name);
+    }
+  }
+  $.ajax({
+    type: "POST",
+    url : "/msg",
+    cache: false,
+    data: {list: namelist, msg: msg},
+  });
+}
+
+function isImage(msg) {
+  if (msg.length >= 4) {
+    var last = msg.substring(msg.length-4, msg.length);
+    if (last == ".jpg" || last == ".png") {
+      return true;
+    }
+  }
+  return false;
 }
 
 function appendMessage(who, msg) {
-  $('#messages_container').append('<p><span>'+who+'</span>'+msg+'</p>');
+  var content;
+  if (isImage(msg)) {
+    content = '<p><span>'+who+'</span><a href="'+msg+'" class="lightbox"><img src="'+msg+'" height="50" width="50"></a>'+'</p>';
+  } else {
+    content = '<p><span>'+who+'</span>'+msg+'</p>';
+  }
+  $('#messages_container').append(content);
+  $('a.lightbox').lightBox({
+    imageLoading: '/assets/lightbox-ico-loading.gif',
+    imageBtnClose: '/assets/lightbox-btn-close.gif',
+    imageBtnPrev: '/assets/lightbox-btn-prev.gif',
+    imageBtnNext: '/assets/lightbox-btn-next.gif',
+  });
+  $('#messages_container').scrollTop($(this).height());
 }
 
 function shakeIt () {
@@ -377,8 +440,8 @@ function shakeIt () {
     //success: function() {  },
     //error: function(xhr){  setTimeout(monitorPosition, 3000); alert("note: sendPosition error"); }        
   });
-
 }
+
 
 
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

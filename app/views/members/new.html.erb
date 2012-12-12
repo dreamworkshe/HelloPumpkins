@@ -5,7 +5,7 @@ navigator.geolocation.getCurrentPosition(function(position){}, function(){});
 <div data-role="page" data-title="Home">
 	<div data-role="header" data-theme="b" data-position="fixed">
 		<a href="/login" data-iconpos="notext" data-icon="home"></a>
-		<h1>Welcome</h1>
+		<h1>Hello Pumpkins!</h1>
 	</div>
 	<div data-role="content" data-theme="b" class="a_page">
 		<%= form_for(:member, url: '/enter', html: {id: 'middle'}) do |f| %>
@@ -15,6 +15,6 @@ navigator.geolocation.getCurrentPosition(function(position){}, function(){});
 		<% end %>
 	</div>
 	<div data-role="footer" data-theme="b" data-position="fixed">
-		<h1>Ubicomp 2012 Fall</h1>
+		<h1>Ubicomp Fall 2012</h1>
 	</div>
 </div>

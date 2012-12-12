@@ -14,20 +14,19 @@
 
 
 <!-- main page -->
-
 <div data-role="page" data-title="Home" id="main_page">
 	<div data-role="header" data-theme="b" data-position="fixed">
 		<a href="/login" data-iconpos="notext" data-icon="home"></a>
 		<a href="/logout" onClick="pusher.unsubscribe('presence-map-channel');">Logout</a>
-		<h1>Welcome</h1>
+		<h1>Hello Pumpkins!</h1>
 	</div>
 	<div data-role="content" class="a_page" id="content_container">	
 		<div id="username" style="display:none;"><%= session[:name] %></div>
 		
 		<!-- map -->
 		<div id="radar_container">
-			<div id="radius_display_block"></div>
-			<center><div id="map_container"></div></center>
+			<center><div id="radius_display_block"></div>
+			<div id="map_container"></div></center>
 		</div>
 
 		<!-- list -->

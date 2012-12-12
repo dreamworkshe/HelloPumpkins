@@ -16,6 +16,7 @@ Checkin::Application.routes.draw do
   match '/list', to: 'members#list'
   match '/pos', to: 'members#pos'
   match '/shake', to: 'members#shake'
+  match '/msg', to: 'members#msg'
   get "static_pages/home"
   get "static_pages/help"
 

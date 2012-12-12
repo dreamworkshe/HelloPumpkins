@@ -11,8 +11,14 @@
 	margin-bottom: 0px;
 }
 
-#messages_container { height: 300px; overflow: auto; border: 1px solid #666; padding: 20px; background: white; font: 12px "Lucida Grande"; }
-#messages_container span { color: white; background: #333; padding: 4px 8px; -moz-border-radius: 5px; -webkit-border-radius: 8px; margin: 0 5px 0 0; }
+#radius_display_block {
+	font-family: 'Milonga', cursive;
+	margin-bottom: 5px;
+	font-size: 20px;
+}
+
+#messages_container { height: 300px; overflow: auto; border: 0px solid #666; padding: 20px; background: white; font: 12px "Lucida Grande"; }
+#messages_container span { text-shadow: 0 0 0; color: white; background: #333; padding: 4px 8px; -moz-border-radius: 5px; -webkit-border-radius: 8px; margin: 0 5px 0 0; }
 #messages_container p { padding: 8px 0; border-bottom: 1px solid #ccc; }
 
 

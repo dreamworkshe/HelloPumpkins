@@ -74,4 +74,11 @@ class MembersController < ApplicationController
   	#puts('received!')
   	Pusher['presence-map-channel'].trigger!('shakeYourPage', {})
   end
+
+  def msg
+  	who = session[:name]
+  	list = params[:list]
+  	msg = params[:msg]
+  	Pusher['presence-map-channel'].trigger!('newMessage', {who: who, list: list, msg: msg})
+  end
 end
