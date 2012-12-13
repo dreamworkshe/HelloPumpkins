@@ -10,14 +10,6 @@ var pusher;
 var NAME;
 
 
-// window.addEventListener("load", function() {
-//   setTimeout(function() {
-//     window.scrollTo(0, 1);
-//   }, 0);
-// });
-
-
-
 $(document).ready(function() {
   
   // loading widget
@@ -30,6 +22,7 @@ $(document).ready(function() {
 
   // detecting shaking
   window.addEventListener('shake', shakeIt, false);
+  
   // init jrumble
   $('#content_container').jrumble({
     speed: 40,
@@ -43,9 +36,6 @@ $(document).ready(function() {
       sendMessage();
     }
   });
-
-  // init lightbox
-  $('a.lightbox').lightBox();
 
   NAME = $('#username').text();
   Members = new Array();
@@ -99,7 +89,6 @@ function setupChannel() {
   // event for updating postions
   channel.bind('updateMap', function(data) {
     var who = data.name, id = data.id, lat = data.latitude, lon = data.longitude;
-    //console.log(who + " " + lat + " " + lon);
     var latlng = new google.maps.LatLng(lat, lon);
 
     // update the i-th member's info
@@ -112,7 +101,6 @@ function setupChannel() {
         if (who != NAME) {
           var near;
           if (RADIUS >= myDistance(My_marker.getPosition(), Members[i].marker.getPosition())) {
-            // console.log(Members[i].name + " is near!");
             // set pumpkin
             // Members[i].marker.set('icon', new google.maps.MarkerImage("/assets/happy.png"));
             near = true;
@@ -129,9 +117,6 @@ function setupChannel() {
               if (Members_list[j].isNear != near) {
                 // do list update
                 if (near) {
-                  //$('#members_list').append('<li id="member_' + who +'">' + who + '<span>' + date.getHours() + ':' + date.getMinutes() +  '</span></li>');
-                  //$('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
-                  //$('#members_list').append('<li id="member_' + who +'">' + who + ' (' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ')</li>');            
                   appended = true;
                 } else {
                   $('li#member_' + who).remove();
@@ -148,11 +133,7 @@ function setupChannel() {
             var mem = {name: who, isNear: near};
             Members_list.push(mem);
             if (near) {
-              //$('#members_list').append('<li id="member_' + who +'">' + who + '<span>' + date.getHours() + ':' + date.getMinutes() +  '</span></li>');
-              //$('#members_list').append('<li id="member_' + who +'">' + who + '</li>');
-              //$('#members_list').append('<li id="member_' + who +'">' + who + ' (' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ')</li>');
               appended = true;
-              //$('#members_list').listview('refresh');
             }
           }
           // send notification
@@ -281,13 +262,6 @@ function setupMap() {
   
   navigator.geolocation.getCurrentPosition(function(position) {
 
-    // var mapcanvas = document.createElement('div');
-    // mapcanvas.id = 'mapcanvas';
-    // var map_width = $(window).width() * 1,
-    // map_height = $(window).height() * 0.75;
-    // mapcanvas.style.width = map_width + 'px';
-    // mapcanvas.style.height = map_height + 'px';
-    // $('#map_container').append(mapcanvas);
     $('#map_container').width('100%');
 
     var useragent = navigator.userAgent;
@@ -309,47 +283,16 @@ function setupMap() {
     };
     MAPCANVAS = new google.maps.Map(document.getElementById("map_container"), options);
     google.maps.event.trigger(MAPCANVAS, 'resize');
-    // init self marker here!!
-    // var marker = new google.maps.Marker({
-    //   position: latlng, 
-    //   map: MAPCANVAS,
-    //   icon: new google.maps.MarkerImage("/assets/witch_hat_128.png", null, null, null, new google.maps.Size(32, 32))
-    // });
 
-    // var mapLabel = new MapLabel({
-    //   text: who,
-    //   position: latlng,
-    //   map: MAPCANVAS,
-    //   fontSize: 12,
-    //   align: 'center'
-    // });
-
-    // My_marker = marker;
-    // var distanceWidget = new DistanceWidget(MAPCANVAS, marker, mapLabel);
-    // google.maps.event.addListener(distanceWidget, 'distance_changed', function() {
-    //   RADIUS = distanceWidget.get('distance');
-    //   $('#radius_display_block').text("My radar: " + RADIUS.toFixed(0) + "m");
-    // });
-    // memberinfo = {name: who, id: id, marker: marker, latitude: lat, longitude: lon, widget: distanceWidget};
-    // Members.push(memberinfo);
-    // finished initing
-    // console.log("here");
     monitorPosition();
   }, error);
 }
 
 
 // monitor function
-var lastlat = 0, lastlon = 0;
 function monitorPosition() {
   navigator.geolocation.getCurrentPosition(function(position) {
     var lat = position.coords.latitude, lon = position.coords.longitude;
-    if (lastlat != 0 && lastlon != 0) {
-      //alert(1000*distance(lat, lon, lastlat, lastlon));
-      //alert(lat + " " + lon);
-    }
-    lastlat = lat;
-    lastlon = lon;
     sendPosition(lat, lon);
   }, function() {
     alert('error');
@@ -394,11 +337,6 @@ function showChatContainer() {
 }
 
 function sendMessage() {
-  /*
-  var msg = $('#input_message').val();
-  $('#input_message').val('');
-  appendMessage(NAME, msg);
-  */
   var msg = $('#input_message').val();
   $('#input_message').val('');
   var namelist = new Array();
@@ -520,27 +458,6 @@ function error() {
 	alert('error!');
 }
 
-
-
-// function LabelWidget(map, marker, who) {
-//   this.set('map', map);
-//   this.set('position', marker.getPosition());
-
-//   this.bindTo('map', marker);
-//   this.bindTo('position', marker);
-
-//   var mapLabel = new MapLabel({
-//     text: who,
-//     position: marker.getPosition(),
-//     map: map,
-//     fontSize: 12,
-//     align: 'center'
-//   });
-
-//   mapLabel.bindTo('map', this);
-//   mapLabel.bindTo('position', this);
-// }
-// LabelWidget.prototype = new google.maps.MVCObject();
 
 function DistanceWidget(map, marker, label) {
   this.set('map', map);
@@ -685,27 +602,6 @@ function myDistance(p1, p2) {
   return d * 1000;
 }
 
-// function LabelWidget(marker) {
-//   this.set('map', marker);
-//   this.set('position', marker);
-//   var mapLabel = new MapLabel({
-//     text: '123',
-//     fontSize: 12,
-//     align: 'center'
-//   });
-//   marker.bindTo('map', mapLabel);
-//   marker.bindTo('position', mapLabel);
-// }
-// LabelWidget.prototype = new google.maps.MVCObject();
-
-// LabelWidget.prototype.position_changed = function() {
-//   //this.mlabel.setPosition(this.get('position'));
-// }
-
-// LabelWidget.prototype.map_changed = function() {
-//   alert(this.a);
-//   //this.mlabel.setMap(this.get('map'));
-// }
 
 
 // for reference

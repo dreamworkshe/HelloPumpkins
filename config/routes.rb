@@ -1,4 +1,6 @@
 Checkin::Application.routes.draw do
+
+
   resources :events
   resources :sessions, only: [:new, :create, :destroy]
   resources :members, only: [:new, :create, :enter, :exit]
@@ -19,6 +21,7 @@ Checkin::Application.routes.draw do
   match '/msg', to: 'members#msg'
   get "static_pages/home"
   get "static_pages/help"
+  get "pages/home"
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
