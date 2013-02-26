@@ -5,7 +5,7 @@ Checkin::Application.routes.draw do
   resources :sessions, only: [:new, :create, :destroy]
   resources :members, only: [:new, :create, :enter, :exit]
 
-  root to: 'static_pages#home'
+  root to: 'members#new'
   match '/help', to: 'static_pages#help'
   match '/hold', to: 'events#new'
   match '/push', to: 'events#push'

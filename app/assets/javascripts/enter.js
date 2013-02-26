@@ -296,7 +296,8 @@ function monitorPosition() {
     sendPosition(lat, lon);
   }, function() {
     alert('error');
-  });
+  }, {maximumAge:300000});
+  //console.log('here');
 }
 
 // send current position to server
