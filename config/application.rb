@@ -64,5 +64,10 @@ module Checkin
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
+
+    # Pusher settings
+    Pusher.app_id = '31527'
+    Pusher.key = '0b7f4e07db19c4ba312d'
+    Pusher.secret = 'f52bf70fb5339bf46300'
   end
 end
