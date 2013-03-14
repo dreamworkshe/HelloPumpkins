@@ -1,3 +1,3 @@
-# Check in application
+# Hello Pumpkins!
 
-This is a checkin app that is being built. Thanks.
+Hello Pumpkins is a location-based web application experiment, supporting mobile check-ins between users.
